@@ -7,14 +7,29 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
   <h1>Grocery Price Comparison</h1>
+
+  <!-- Checkboxes to toggle columns -->
+  <label><input type="checkbox" id="togglePriceLidl" onchange="toggleColumn(5)"> Show Price at Lidl</label>
+  <label><input type="checkbox" id="toggleDateLidl" onchange="toggleColumn(6)"> Show Date Checked at Lidl</label>
+  <label><input type="checkbox" id="togglePriceAde" onchange="toggleColumn(7)"> Show Price at Ade's</label>
+  <label><input type="checkbox" id="toggleDateAde" onchange="toggleColumn(8)"> Show Date Checked at Ade's</label>
+  <label><input type="checkbox" id="togglePriceTesco" onchange="toggleColumn(9)"> Show Price at Tesco</label>
+  <label><input type="checkbox" id="toggleDateTesco" onchange="toggleColumn(10)"> Show Date Checked at Tesco</label>
+  <label><input type="checkbox" id="togglePriceAldi" onchange="toggleColumn(11)"> Show Price at Aldi</label>
+  <label><input type="checkbox" id="toggleDateAldi" onchange="toggleColumn(12)"> Show Date Checked at Aldi</label>
+  <label><input type="checkbox" id="toggleItemCategory" onchange="toggleColumn(13)"> Show Item Category</label>
+  <label><input type="checkbox" id="toggleBrandHierarchy" onchange="toggleColumn(14)"> Show Brand Hierarchy</label>
+
+  <br><br>
 
   <input type="text" id="searchInput" placeholder="Search for an item...">
   <button onclick="search()">Search</button>
 
-  <div id="results"></div> 
+  <div id="results"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
   <script src="script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
 </body>
 </html>

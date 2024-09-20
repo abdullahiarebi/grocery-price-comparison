@@ -1,16 +1,20 @@
-/* Add some basic styling */
+/* Basic table styles */
 table {
   width: 100%;
   border-collapse: collapse;
 }
+
 th, td {
+  border: 1px solid black;
   padding: 8px;
   text-align: left;
-  border: 1px solid #ddd;
 }
+
 th {
   background-color: #f2f2f2;
 }
-tr:nth-child(even) {
-  background-color: #f9f9f9;
+
+/* Hidden column styles */
+.hide-column {
+  display: none;
 }
