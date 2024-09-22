@@ -16,24 +16,27 @@ header {
 main {
     flex: 1;
     display: flex;
-    justify-content: center; /* Center the container horizontally */
+    justify-content: center; 
 }
 
 .container {
     display: flex;
-    width: 80%; /* Adjust the width as needed */
-    max-width: 1200px; /* Set a maximum width for larger screens */
+    flex-direction: column; /* Stack columns vertically on smaller screens */
+    width: 90%; /* Take up most of the screen width on smaller screens */
+    max-width: 1200px; 
 }
 
 .left-column {
-    width: 25%;
+    width: 100%; /* Full width on smaller screens */
     padding: 20px;
+    order: 2; /* Place the left column below the right column on smaller screens */
 }
 
 .right-column {
-    width: 75%;
+    width: 100%; 
     padding: 20px;
     overflow-x: auto; 
+    order: 1; /* Place the right column above the left column on smaller screens */
 }
 
 .search-container {
@@ -45,7 +48,7 @@ main {
     padding: 0.8rem;
     border: 1px solid #ccc;
     border-radius: 5px 0 0 5px;
-    width: 100%; /* Take up full width of the left column */
+    width: 100%; 
 }
 
 #search-button {
@@ -88,4 +91,21 @@ tr:nth-child(even) {
 
 .filter-toggle label {
     margin-left: 5px;
+}
+
+/* Media query for larger screens (e.g., tablets and desktops) */
+@media (min-width: 768px) {
+    .container {
+        flex-direction: row; /* Arrange columns side-by-side */
+    }
+
+    .left-column {
+        width: 25%;
+        order: 0; /* Reset the order */
+    }
+
+    .right-column {
+        width: 75%;
+        order: 0; 
+    }
 }
