@@ -1,20 +1,91 @@
-/* Basic table styles */
+body {
+    font-family: sans-serif;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+header {
+    background-color: #3498db; 
+    color: white;
+    text-align: center;
+    padding: 2rem 0;
+}
+
+main {
+    flex: 1;
+    display: flex;
+    justify-content: center; /* Center the container horizontally */
+}
+
+.container {
+    display: flex;
+    width: 80%; /* Adjust the width as needed */
+    max-width: 1200px; /* Set a maximum width for larger screens */
+}
+
+.left-column {
+    width: 25%;
+    padding: 20px;
+}
+
+.right-column {
+    width: 75%;
+    padding: 20px;
+    overflow-x: auto; 
+}
+
+.search-container {
+    display: flex;
+    margin-bottom: 20px; 
+}
+
+#search-box {
+    padding: 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 5px 0 0 5px;
+    width: 100%; /* Take up full width of the left column */
+}
+
+#search-button {
+    background-color: #2980b9; 
+    color: white;
+    border: none;
+    padding: 0.8rem 1rem;
+    border-radius: 0 5px 5px 0;
+    cursor: pointer;
+}
+
 table {
-  width: 100%;
-  border-collapse: collapse;
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px solid #ddd;
 }
 
 th, td {
-  border: 1px solid black;
-  padding: 8px;
-  text-align: left;
+    text-align: left;
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
 }
 
 th {
-  background-color: #f2f2f2;
+    background-color: #f0f0f0;
+    cursor: pointer; 
 }
 
-/* Hidden column styles */
-.hide-column {
-  display: none;
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+#filter-container {
+    margin-bottom: 20px;
+}
+
+.filter-toggle {
+    margin-right: 10px;
+}
+
+.filter-toggle label {
+    margin-left: 5px;
 }
