@@ -1,35 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grocery Price Comparison</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Grocery Genie</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <h1>Grocery Price Comparison</h1>
-    </header>
+    <h1>Grocery Genie</h1>
 
-    <main>
-        <div class="container">
-            <div class="left-column">
-                <div class="search-container">
-                    <input type="text" id="search-box" placeholder="Search for groceries...">
-                    <button id="search-button">Search</button>
-                </div>
+    <input type="text" id="search-box" placeholder="Search for groceries...">
+    <button id="search-button">Search</button>
 
-                <div id="filter-container">
-                </div>
-            </div>
+    <div id="search-results"></div>
 
-            <div class="right-column">
-                <div id="results-container"></div>
-            </div>
-        </div>
-    </main>
+    <h2>My Grocery List</h2>
+    <table id="grocery-list">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Brand</th>
+                <th>Lidl</th>
+                <th>Tesco</th>
+                <th>Aldi</th>
+                <th>Actions</th> 
+            </tr>
+        </thead>
+        <tbody></tbody> 
+    </table>
 
-    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script> 
+    <div id="total-cost"></div>
+
+    <button id="clear-list-button">Clear List</button>
+    <button id="print-list-button">Print List</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.1/papaparse.min.js"></script> 
     <script src="script.js"></script>
 </body>
 </html>

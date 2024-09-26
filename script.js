@@ -1,139 +1,168 @@
-document.addEventListener('DOMContentLoaded', (event) => {
-    const searchButton = document.getElementById('search-button');
-    const searchBox = document.getElementById('search-box');
-    const resultsContainer = document.getElementById('results-container');
-    const filterContainer = document.getElementById('filter-container');
-    let productData = [];
-    let currentSortOrder = {}; 
+let groceryData = [];
+let groceryList = [];
 
-    fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vQz_tgwab1x4tNxIdO94L9nY-hgjtImndTag6zy7UtStJE7FGALHFxRvF848AxG5HhGo68xNNAU2xsn/pub?gid=0&single=true&output=csv')
-        .then(response => response.text())
-        .then(csvData => {
-            productData = Papa.parse(csvData, { header: true }).data;
-            createFilterToggles(productData[0]); 
-            displayResults(productData); 
-        })
-        .catch(error => {
-            console.error('Error fetching or parsing CSV data:', error);
-        });
-
-    searchButton.addEventListener('click', () => {
-        const query = searchBox.value.toLowerCase();
-        const filteredData = productData.filter(product => {
-            if (product['Item']) { 
-                return product['Item'].toLowerCase().includes(query);
-            } else {
-                return false; 
-            }
-        });
-
-        displayResults(filteredData);
+fetch('https://docs.google.com/spreadsheets/d/1DeZ5yW5ZatBI8UM-Q-Xxiv1-3OuJo1pu56fw0DPRAVI/pub?gid=1930187566&single=true&output=csv')
+    .then(response => response.text())
+    .then(text => {
+        groceryData = Papa.parse(text, { header: true }).data;
     });
 
-    function createFilterToggles(headers) {
-    const excludedColumns = ['Item', 'Brand', 'Quantity', 'Size', 'Unit']; // Columns to exclude
+const searchBox = document.getElementById('search-box');
+const searchButton = document.getElementById('search-button');
+const searchResults = document.getElementById('search-results');
+const groceryListEl = document.getElementById('grocery-list').getElementsByTagName('tbody')[0]; 
+const totalCostEl = document.getElementById('total-cost');
+const clearListButton = document.getElementById('clear-list-button');
+const printListButton = document.getElementById('print-list-button');
 
-    for (const key in headers) {
-        if (excludedColumns.includes(key)) {
-            continue; // Skip excluded columns
+// Custom event for list updates
+const groceryListUpdatedEvent = new CustomEvent('groceryListUpdated');
+
+searchButton.addEventListener('click', () => {
+    const searchTerm = searchBox.value.toLowerCase();
+    const filteredResults = groceryData.filter(item => 
+        item.Item.toLowerCase().includes(searchTerm) ||
+        item.Brand.toLowerCase().includes(searchTerm) ||
+        item.Category.toLowerCase().includes(searchTerm) ||
+        item.Description.toLowerCase().includes(searchTerm) 
+    );
+
+    displaySearchResults(filteredResults);
+});
+
+function displaySearchResults(results) {
+    searchResults.innerHTML = ''; 
+
+    results.forEach(item => {
+        const itemDiv = document.createElement('div');
+        itemDiv.classList.add('grocery-item');
+
+        // Check if item is in grocery list and add 'selected' class if so
+        if (groceryList.some(listItem => listItem.Item === item.Item && listItem.Brand === item.Brand)) {
+            itemDiv.classList.add('selected');
         }
 
-        const toggle = document.createElement('div');
-        toggle.classList.add('filter-toggle');
-
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.id = `toggle-${key}`;
-        checkbox.checked = true; 
-        checkbox.addEventListener('change', () => {
-            toggleColumn(key);
+        itemDiv.innerHTML = `
+            <h3>${item.Item}</h3>
+            <p>Description: ${item.Description}</p>
+            <p>Brand: ${item.Brand}</p>
+            <p>Quantity: ${item.Quantity} ${item.Unit}</p>
+            <p>Size: ${item.Size}</p>
+            <p>Lidl: £${item.Lidl || 'N/A'}</p> 
+            <p>Tesco: £${item.Tesco || 'N/A'}</p> 
+            <p>Aldi: £${item.Aldi || 'N/A'}</p> 
+        `;
+        itemDiv.addEventListener('click', () => {
+            updateGroceryList(item);
         });
-
-        const label = document.createElement('label');
-        label.htmlFor = `toggle-${key}`;
-        label.textContent = key;
-
-        toggle.appendChild(checkbox);
-        toggle.appendChild(label);
-        filterContainer.appendChild(toggle);
-    }
+        searchResults.appendChild(itemDiv);
+    });
 }
-    function toggleColumn(columnName) {
-        const table = resultsContainer.querySelector('table');
-        const headerIndex = Array.from(table.querySelectorAll('th')).findIndex(th => th.textContent === columnName);
 
-        for (let i = 0; i < table.rows.length; i++) {
-            table.rows[i].cells[headerIndex].style.display = document.getElementById(`toggle-${columnName}`).checked ? '' : 'none';
-        }
+function updateGroceryList(item) {
+    const existingItemIndex = groceryList.findIndex(listItem => 
+        listItem.Item === item.Item && listItem.Brand === item.Brand
+    );
+
+    if (existingItemIndex > -1) {
+        groceryList.splice(existingItemIndex, 1); 
+    } else {
+        groceryList.push(item);
     }
 
-    function displayResults(results) {
-        resultsContainer.innerHTML = ''; 
+    displayGroceryList();
+    calculateTotalCost();
 
-        if (results.length === 0) {
-            resultsContainer.innerHTML = '<p>No results found.</p>';
-            return;
-        }
+    // Dispatch event to update search results
+    searchResults.dispatchEvent(groceryListUpdatedEvent); 
+}
 
-        const table = document.createElement('table');
+// Event listener for grocery list updates
+searchResults.addEventListener('groceryListUpdated', () => {
+    const searchResultItems = searchResults.querySelectorAll('.grocery-item');
+    searchResultItems.forEach(itemDiv => {
+        const itemName = itemDiv.querySelector('h3').textContent;
+        const brandName = itemDiv.querySelectorAll('p')[1].textContent.replace('Brand: ', ''); 
 
-        const headerRow = table.insertRow();
-        for (const key in results[0]) {
-            const th = document.createElement('th');
-            th.textContent = key;
-            th.addEventListener('click', () => {
-                sortTable(key);
-            });
-            headerRow.appendChild(th);
-        }
+        const isInGroceryList = groceryList.some(listItem => 
+            listItem.Item === itemName && listItem.Brand === brandName
+        );
 
-        results.forEach(product => {
-            const row = table.insertRow();
-            for (const key in product) {
-                const cell = row.insertCell();
-                cell.textContent = product[key];
-            }
-        });
-
-        resultsContainer.appendChild(table);
-    }
-
-    function sortTable(column) {
-        if (currentSortOrder.column === column) {
-            currentSortOrder.ascending = !currentSortOrder.ascending;
+        if (isInGroceryList) {
+            itemDiv.classList.add('selected');
         } else {
-            currentSortOrder.column = column;
-            currentSortOrder.ascending = true;
+            itemDiv.classList.remove('selected');
         }
+    });
+});
 
-        const filteredData = Array.from(resultsContainer.querySelector('table').querySelectorAll('tr'))
-            .slice(1) 
-            .map(row => Array.from(row.cells).map(cell => cell.textContent));
+function displayGroceryList() {
+    groceryListEl.innerHTML = '';
 
-        filteredData.sort((a, b) => {
-            const valueA = a[getColumnIndex(column)];
-            const valueB = b[getColumnIndex(column)];
+    groceryList.forEach((item, index) => {
+        const row = groceryListEl.insertRow();
+        const itemCell = row.insertCell();
+        const brandCell = row.insertCell();
+        const lidlCell = row.insertCell();
+        const tescoCell = row.insertCell();
+        const aldiCell = row.insertCell();
+        const actionsCell = row.insertCell();
 
-            if (!isNaN(valueA) && !isNaN(valueB)) {
-                return currentSortOrder.ascending ? valueA - valueB : valueB - valueA;
-            } else {
-                return currentSortOrder.ascending 
-                    ? valueA.localeCompare(valueB) 
-                    : valueB.localeCompare(valueA);
-            }
+        itemCell.textContent = item.Item;
+        brandCell.textContent = item.Brand;
+        lidlCell.textContent = item.Lidl || 'N/A';
+        tescoCell.textContent = item.Tesco || 'N/A';
+        aldiCell.textContent = item.Aldi || 'N/A';
+
+        const removeButton = document.createElement('button');
+        removeButton.textContent = 'Remove';
+        removeButton.addEventListener('click', () => {
+            groceryList.splice(index, 1); 
+            displayGroceryList();
+            calculateTotalCost();
+
+            // Dispatch event to update search results
+            searchResults.dispatchEvent(groceryListUpdatedEvent); 
         });
+        actionsCell.appendChild(removeButton);
+    });
+}
 
-        displayResults(filteredData.map(row => {
-            const obj = {};
-            Array.from(resultsContainer.querySelector('table').querySelectorAll('th')).forEach((th, index) => {
-                obj[th.textContent] = row[index];
-            });
-            return obj;
-        }));
+function calculateTotalCost() {
+    const storeTotals = { Lidl: 0, Tesco: 0, Aldi: 0 };
+
+    groceryList.forEach(item => {
+        if (item.Lidl) storeTotals.Lidl += parseFloat(item.Lidl);
+        if (item.Tesco) storeTotals.Tesco += parseFloat(item.Tesco);
+        if (item.Aldi) storeTotals.Aldi += parseFloat(item.Aldi);
+    });
+
+    let totalCostHTML = '';
+    for (const store in storeTotals) {
+        if (storeTotals[store] > 0) {
+            totalCostHTML += `<p>${store}: £${storeTotals[store].toFixed(2)}</p>`;
+        }
     }
 
-    function getColumnIndex(columnName) {
-        return Array.from(resultsContainer.querySelector('table').querySelectorAll('th'))
-            .findIndex(th => th.textContent === columnName);
-    } 
+    totalCostEl.innerHTML = totalCostHTML;
+}
+
+clearListButton.addEventListener('click', () => {
+    groceryList = [];
+    displayGroceryList();
+    calculateTotalCost();
+    searchResults.dispatchEvent(groceryListUpdatedEvent); 
+});
+
+printListButton.addEventListener('click', () => {
+    const printWindow = window.open('', '', 'height=500,width=800');
+    printWindow.document.write('<html><head><title>Grocery List</title>');
+    printWindow.document.write('<link rel="stylesheet" href="styles.css">'); 
+    printWindow.document.write('</head><body>');
+    printWindow.document.write('<h2>My Grocery List</h2>');
+    printWindow.document.write(document.getElementById('grocery-list').outerHTML);
+    printWindow.document.write(document.getElementById('total-cost').outerHTML);
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    printWindow.print();
 });
