@@ -1,0 +1,36 @@
+body {
+    font-family: sans-serif;
+}
+
+#search-results {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.grocery-item {
+    border: 1px solid #ccc;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.selected {
+    background-color: #e0f2f1; 
+}
+
+/* ... (Previous styles remain the same) */
+
+#grocery-list {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#grocery-list th, #grocery-list td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+#grocery-list th {
+    background-color: #f2f2f2;
+}
